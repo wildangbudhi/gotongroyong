@@ -42,7 +42,11 @@ function FormSubmit() {
         }
         const photos = base64String;
 
-        const result = await gotongroyong_backend.addReport(latitude, longitude, photos);
+        const result = await gotongroyong_backend.addReport(
+            parseFloat(latitude),
+            parseFloat(longitude),
+            photos
+        );
         console.log(result);
         setShowSuccess(true);
     };
