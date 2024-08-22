@@ -1,37 +1,37 @@
 import React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container, Navbar, Nav, Button } from 'react-bootstrap';
 import LoggedOut from "./LoggedOut";
-import { useAuth, AuthProvider } from "./use-auth-client";
-import "./assets/main.css";
 import LoggedIn from "./LoggedIn";
-import Form from "./Form";
+import { useAuth, AuthProvider } from "./use-auth-client";
 
 function App() {
-  const { isAuthenticated, identity } = useAuth();
+  const { isAuthenticated, identity, logout } = useAuth();
+
+  const renderNavbar = () => (
+    <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
+      <Container>
+        <Navbar.Brand href="#home">Gotong Royong</Navbar.Brand>
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link href="#features">Home</Nav.Link>
+          </Nav>
+          <Nav>
+            <Button className="ml-auto mr-3" onClick={logout}>
+              Logout
+            </Button>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+  );
+
   return (
     <>
-      <header id="header">
-        <section id="status" className="toast hidden">
-          <span id="content"></span>
-          <button className="close-button" type="button">
-            <svg
-              aria-hidden="true"
-              className="w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
-          </button>
-        </section>
-      </header>
+      {isAuthenticated && renderNavbar()}
       <main id="pageContent">
-        {isAuthenticated ? <LoggedIn /> : <Form />}
+        {isAuthenticated ? <LoggedIn /> : <LoggedOut />}
       </main>
     </>
   );
