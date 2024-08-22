@@ -1,0 +1,31 @@
+/* Custom background color for the card */
+.custom-card {
+    background-color: #f8f9fa;
+    /* Light gray background */
+    border: 1px solid #ced4da;
+    /* Gray border */
+}
+
+/* Custom button color */
+.custom-button {
+    background-color: #28a745;
+    /* Bootstrap success green */
+    border-color: #28a745;
+}
+
+.custom-button:hover {
+    background-color: #218838;
+    /* Darker green on hover */
+    border-color: #1e7e34;
+}
+
+/* Custom card title and text color */
+.custom-title {
+    color: #007bff;
+    /* Bootstrap primary blue */
+}
+
+.custom-text {
+    color: #343a40;
+    /* Darker gray for the text */
+}
