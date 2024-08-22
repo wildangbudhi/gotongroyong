@@ -1,8 +1,10 @@
 import React from "react";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import LoggedOut from "./LoggedOut";
 import { useAuth, AuthProvider } from "./use-auth-client";
 import "./assets/main.css";
 import LoggedIn from "./LoggedIn";
+import Form from "./Form";
 
 function App() {
   const { isAuthenticated, identity } = useAuth();
@@ -29,7 +31,7 @@ function App() {
         </section>
       </header>
       <main id="pageContent">
-        {isAuthenticated ? <LoggedIn /> : <LoggedOut />}
+        {isAuthenticated ? <LoggedIn /> : <Form />}
       </main>
     </>
   );
