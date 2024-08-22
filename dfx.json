@@ -24,6 +24,11 @@
       },
       "type": "custom",
       "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+    },
+    "icrc1_ledger": {
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/1ac5439c6da1aafe8156c667c313344c0245fea3/rs/rosetta-api/icrc1/ledger/ledger.did",
+      "type": "custom",
+      "wasm": "https://download.dfinity.systems/ic/1ac5439c6da1aafe8156c667c313344c0245fea3/canisters/ic-icrc1-ledger.wasm.gz"
     }
   },
   "defaults": {
