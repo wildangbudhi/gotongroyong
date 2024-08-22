@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
+import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { gotongroyong_backend } from "../../declarations/gotongroyong_backend";
@@ -11,6 +11,7 @@ function FormSubmit() {
     const [base64String, setBase64String] = useState('');
     const [latitude, setLatitude] = useState('');
     const [longitude, setLongitude] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -43,10 +44,16 @@ function FormSubmit() {
 
         const result = await gotongroyong_backend.addReport(latitude, longitude, photos);
         console.log(result);
+        setShowSuccess(true);
     };
 
     return (
         <Row className='mt-3'>
+            {showSuccess && (
+                <Alert variant="success" className="mt-3">
+                    Your form was submitted successfully!
+                </Alert>
+            )}
             <Form noValidate validated={validated} onSubmit={handleSubmit}>
                 <Form.Group className="mb-12" controlId="formBasicEmail">
                     <Form.Label>Longitude</Form.Label>
