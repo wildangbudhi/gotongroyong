@@ -4,6 +4,7 @@ import Text "mo:base/Text";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Nat32 "mo:base/Nat32";
+import List "mo:base/List";
 
 actor {
 
@@ -26,15 +27,12 @@ actor {
     return f1_1 == f2_1 and f1_2 == f2_2;
   };
 
-  var reportDatabases: [Report] = [];
+  var reportDatabases: List.List<Report> = List.fromArray([]);
   var reportMap: HashMap.HashMap<(Int, Int), Int> = HashMap.HashMap<(Int, Int), Int>(0, compareIntPair, hashIntPair);
+  var cleaningConfirmationDatabases: List.List<Report> = List.fromArray([]);
 
   public shared (msg) func whoami() : async Principal {
       msg.caller
-  };
-
-  public query func greet(name : Text) : async Text {
-    return "Hello, " # name # "!";
   };
 
   public func addReport(lat: Float, long: Float, image: Text) : async Bool {
@@ -45,7 +43,7 @@ actor {
       image = image;
     };
 
-    reportDatabases := Array.append(reportDatabases, [newReport]);
+    reportDatabases := List.push<Report>(newReport, reportDatabases);
 
     let compareKey: (Int, Int) = ( Float.toInt( lat * 1000 ), Float.toInt( long * 1000 ) );
     
@@ -63,7 +61,7 @@ actor {
   };
 
   public query func getReports() : async [Report] {
-    return reportDatabases;
+    return List.toArray<Report>(reportDatabases);
   };
 
   type MapsReport = {
@@ -102,6 +100,31 @@ actor {
       case null 0;
       case (?Int) Int
     };
-  }
+  };
+
+  public func confirmCleaning(lat: Float, long: Float, image: Text) : async Bool {
+
+    let newConfirmation: Report = {
+      latitude = lat;
+      longitude = long;
+      image = image;
+    };
+
+    cleaningConfirmationDatabases := List.push<Report>(newConfirmation, cleaningConfirmationDatabases);
+
+    let compareKey: (Int, Int) = ( Float.toInt( lat * 1000 ), Float.toInt( long * 1000 ) );
+    reportMap.delete(compareKey);
+
+    cleaningConfirmationDatabases := List.filter<Report>( 
+      cleaningConfirmationDatabases,
+      func item { 
+        Float.toInt( item.latitude * 1000 ) != Float.toInt( lat * 1000 ) 
+        and Float.toInt( item.longitude * 1000 ) != Float.toInt( long * 1000 )
+      }
+    );
+
+    return true
+
+  };
 
 };
