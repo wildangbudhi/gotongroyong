@@ -5,8 +5,66 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Nat32 "mo:base/Nat32";
 import List "mo:base/List";
+import Ledger "canister:icrc1_ledger";
+import Result "mo:base/Result";
+import Debug "mo:base/Debug";
+import Error "mo:base/Error";
 
 actor {
+
+  type Account = {
+    owner : Principal;
+    subaccount : ?Blob;
+  };
+
+  type TransferArgs = {
+    amount : Nat;
+    toAccount : Account;
+  };
+
+  public shared ({ caller }) func transfer(args : TransferArgs) : async Result.Result<Ledger.BlockIndex, Text> {
+    Debug.print(
+      "Transferring "
+      # debug_show (args.amount)
+      # " tokens to account"
+      # debug_show (args.toAccount)
+    );
+
+    let transferArgs : Ledger.TransferArg = {
+      // can be used to distinguish between transactions
+      memo = null;
+      // the amount we want to transfer
+      amount = args.amount;
+      // we want to transfer tokens from the default subaccount of the canister
+      from_subaccount = null;
+      // if not specified, the default fee for the canister is used
+      fee = null;
+      // we take the principal and subaccount from the arguments and convert them into an account identifier
+      to = args.toAccount;
+      // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
+      created_at_time = null;
+    };
+
+    try {
+      // initiate the transfer
+      let transferResult = await Ledger.icrc1_transfer(transferArgs);
+
+      // check if the transfer was successfull
+      switch (transferResult) {
+        case (#Err(transferError)) {
+          return #err("Couldn't transfer funds:\n" # debug_show (transferError));
+        };
+        case (#Ok(blockIndex)) { return #ok blockIndex };
+      };
+    } catch (error : Error) {
+      // catch any errors that might occur during the transfer
+      return #err("Reject message: " # Error.message(error));
+    };
+  };
+
+  public shared (msg) func whoami() : async Principal {
+      msg.caller
+  };
 
   type Report = {
     latitude: Float;
@@ -30,10 +88,6 @@ actor {
   var reportDatabases: List.List<Report> = List.fromArray([]);
   var reportMap: HashMap.HashMap<(Int, Int), Int> = HashMap.HashMap<(Int, Int), Int>(0, compareIntPair, hashIntPair);
   var cleaningConfirmationDatabases: List.List<Report> = List.fromArray([]);
-
-  public shared (msg) func whoami() : async Principal {
-      msg.caller
-  };
 
   public func addReport(lat: Float, long: Float, image: Text) : async Bool {
 
