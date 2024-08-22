@@ -3,18 +3,48 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
+import { gotongroyong_backend } from "../../declarations/gotongroyong_backend";
 
 function FormSubmit() {
     const [validated, setValidated] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [base64String, setBase64String] = useState('');
+    const [latitude, setLatitude] = useState('');
+    const [longitude, setLongitude] = useState('');
 
-    const handleSubmit = (event) => {
-        const form = event.currentTarget;
-        if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedFile(file);
+    };
+
+    const handleLatitudeChange = (e) => {
+        setLatitude(e.target.value);
+    };
+
+    const handleLongitudeChange = (e) => {
+        setLongitude(e.target.value);
+    };
+
+    const convertToBase64 = (file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setBase64String(reader.result);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (selectedFile) {
+            convertToBase64(selectedFile);
         }
+        const latitude = 1.916757;
+        const longitude = 29.087455;
+        const photos = base64String;
 
-        setValidated(true);
+        const result = await gotongroyong_backend.addReport(latitude, longitude, photos);
+        console.log(result);
     };
 
     return (
@@ -23,12 +53,17 @@ function FormSubmit() {
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
                     <Form.Group className="mb-12" controlId="formBasicEmail">
                         <Form.Label>Longitude</Form.Label>
-                        <Form.Control type="text" placeholder="Enter longitude" />
+                        <Form.Control type="text" placeholder="Enter longitude" value={longitude} onChange={handleLongitudeChange} required />
                     </Form.Group>
                     <br />
                     <Form.Group className="mb-12" controlId="formBasicEmail">
                         <Form.Label>Latitude</Form.Label>
-                        <Form.Control type="email" placeholder="Enter latitude" />
+                        <Form.Control type="email" placeholder="Enter latitude" value={latitude} onChange={handleLatitudeChange} required />
+                    </Form.Group>
+                    <br />
+                    <Form.Group className="mb-12" controlId="formBasicEmail">
+                        <Form.Label>Photo</Form.Label>
+                        <Form.Control type="file" accept="image/*" onChange={handleFileChange} />
                     </Form.Group>
                     <br />
                     <Button type="submit">Submit form</Button>
