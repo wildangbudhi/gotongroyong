@@ -9,6 +9,7 @@ import Ledger "canister:icrc1_ledger";
 import Result "mo:base/Result";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
+import Principal "mo:base/Principal";
 
 actor {
 
@@ -89,7 +90,9 @@ actor {
   var reportMap: HashMap.HashMap<(Int, Int), Int> = HashMap.HashMap<(Int, Int), Int>(0, compareIntPair, hashIntPair);
   var cleaningConfirmationDatabases: List.List<Report> = List.fromArray([]);
 
-  public func addReport(lat: Float, long: Float, image: Text) : async Bool {
+  public shared (msg) func addReport(lat: Float, long: Float, image: Text) : async Bool {
+
+    Debug.print( Principal.toText( msg.caller ) );
 
     let newReport: Report = {
       latitude = lat;
@@ -109,6 +112,18 @@ actor {
 
     counter += 1;
     reportMap.put(compareKey, counter);
+
+    let tfAcc: Account = {
+      owner = msg.caller;
+      subaccount = null;
+    };
+
+    let tfArgs: TransferArgs = {
+      amount = 1;
+      toAccount = tfAcc;
+    };
+
+    let _ = transfer( tfArgs );
 
     return true
 
@@ -156,7 +171,7 @@ actor {
     };
   };
 
-  public func confirmCleaning(lat: Float, long: Float, image: Text) : async Bool {
+  public shared (msg) func confirmCleaning(lat: Float, long: Float, image: Text) : async Bool {
 
     let newConfirmation: Report = {
       latitude = lat;
@@ -169,13 +184,25 @@ actor {
     let compareKey: (Int, Int) = ( Float.toInt( lat * 1000 ), Float.toInt( long * 1000 ) );
     reportMap.delete(compareKey);
 
-    cleaningConfirmationDatabases := List.filter<Report>( 
-      cleaningConfirmationDatabases,
+    reportDatabases := List.filter<Report>( 
+      reportDatabases,
       func item { 
         Float.toInt( item.latitude * 1000 ) != Float.toInt( lat * 1000 ) 
         and Float.toInt( item.longitude * 1000 ) != Float.toInt( long * 1000 )
       }
     );
+
+    let tfAcc: Account = {
+      owner = msg.caller;
+      subaccount = null;
+    };
+
+    let tfArgs: TransferArgs = {
+      amount = 10;
+      toAccount = tfAcc;
+    };
+
+    let _ = transfer( tfArgs );
 
     return true
 

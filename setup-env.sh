@@ -1,0 +1,12 @@
+export PRE_MINTED_TOKENS=10_000_000_000
+export DEFAULT=lsg7a-pmiuz-5rwuk-nwv5a-fjrz6-caw3k-ijsmy-3ktf4-utvo4-m5p7e-tqe
+export TRANSFER_FEE=10_000
+export ARCHIVE_CONTROLLER=rtsxo-eedqt-bn6rm-aptzz-z654r-jlp4w-4b4rs-25bo5-5nyng-z6qbk-nae
+export TRIGGER_THRESHOLD=2000
+export CYCLE_FOR_ARCHIVE_CREATION=10000000000000
+export NUM_OF_BLOCK_TO_ARCHIVE=1000
+export TOKEN_NAME=GT Token
+export TOKEN_SYMBOL=XMTK
+export MINTER=43yc4-7rf5i-lbzix-qk2py-h44mg-cyrdb-pkird-as2fp-zattd-etdg3-vae
+export FEATURE_FLAGS=false
+export BE_TOKEN=bd3sg-teaaa-aaaaa-qaaba-cai
