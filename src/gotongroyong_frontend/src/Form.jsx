@@ -5,7 +5,8 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { gotongroyong_backend } from "../../declarations/gotongroyong_backend";
 
-function FormSubmit() {
+function FormSubmit(props) {
+    const { role } = props;
     const [validated, setValidated] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [base64String, setBase64String] = useState('');
@@ -34,6 +35,22 @@ function FormSubmit() {
         reader.readAsDataURL(file);
     };
 
+    const addReport = async (photos) => {
+        return gotongroyong_backend.addReport(
+            parseFloat(latitude),
+            parseFloat(longitude),
+            photos
+        );
+    }
+
+    const confirmCleaning = async (photos) => {
+        return gotongroyong_backend.confirmCleaning(
+            parseFloat(latitude),
+            parseFloat(longitude),
+            photos
+        );
+    }
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -42,12 +59,7 @@ function FormSubmit() {
         }
         const photos = base64String;
 
-        const result = await gotongroyong_backend.addReport(
-            parseFloat(latitude),
-            parseFloat(longitude),
-            photos
-        );
-        console.log(result);
+        const result = role === 'community' ? await confirmCleaning(photos) : await addReport(photos);
         setShowSuccess(true);
     };
 
