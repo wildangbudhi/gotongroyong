@@ -2,7 +2,7 @@ import Form from "./Form";
 import Header from "./Header";
 
 function LoggedIn(props) {
-  const role = 'community';
+  const role = '';
 
   return (
     <>
