@@ -10,7 +10,6 @@ function Maps() {
     useEffect(() => {
         const getReport = async () => {
             const maps = await gotongroyong_backend.getReportMaps();
-            console.log(maps, 'ini maps')
             setResult([...maps]);
         };
 

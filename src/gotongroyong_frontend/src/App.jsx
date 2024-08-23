@@ -8,7 +8,8 @@ import { useAuth, AuthProvider } from "./use-auth-client";
 
 function App() {
   const [result, setResult] = React.useState("");
-  const { isAuthenticated, whoamiActor } = useAuth();
+  const { whoamiActor } = useAuth();
+  const isAuthenticated = JSON.parse(sessionStorage.getItem('isAuthenticated'));
 
   useEffect(() => {
     const getUser = async () => {

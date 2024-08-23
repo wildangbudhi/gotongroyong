@@ -2,16 +2,20 @@ import React, { useEffect } from "react";
 import { Container, Navbar, Nav, Button } from 'react-bootstrap';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from "./use-auth-client";
+import { gotongroyong_backend } from "../../declarations/gotongroyong_backend";
 
 function Header(props) {
     const [result, setResult] = React.useState("");
-    const { logout, whoamiActor } = useAuth();
+    const [balance, setBalance] = React.useState('0');
+    const { logout } = useAuth();
     const history = useHistory();
 
     useEffect(() => {
         const getUser = async () => {
-            const whoami = await whoamiActor.whoami();
+            const whoami = await gotongroyong_backend.whoami();
+            const balanceWallet = await gotongroyong_backend.checkBalance(whoami);
             setResult(whoami);
+            setBalance(balanceWallet);
         };
 
         getUser();
@@ -33,6 +37,9 @@ function Header(props) {
                         <Nav.Link href="/maps">Maps</Nav.Link>
                     </Nav>
                     <Nav>
+                        <h6 style={{ marginRight: 20 }}>
+                            {`${result} (${balance})`}
+                        </h6>
                         <Button className="ml-auto mr-3" onClick={handleLogout}>
                             Logout
                         </Button>

@@ -53,7 +53,6 @@ export const useAuthClient = (options = defaultOptions) => {
   const [whoamiActor, setWhoamiActor] = useState(null);
 
   useEffect(() => {
-    // Initialize AuthClient
     AuthClient.create(options.createOptions).then(async (client) => {
       updateClient(client);
     });
@@ -71,6 +70,7 @@ export const useAuthClient = (options = defaultOptions) => {
   async function updateClient(client) {
     const isAuthenticated = await client.isAuthenticated();
     setIsAuthenticated(isAuthenticated);
+    sessionStorage.setItem('isAuthenticated', JSON.stringify(isAuthenticated));
 
     const identity = client.getIdentity();
     setIdentity(identity);
@@ -92,6 +92,7 @@ export const useAuthClient = (options = defaultOptions) => {
   async function logout() {
     await authClient?.logout();
     await updateClient(authClient);
+    sessionStorage.removeItem('isAuthenticated');
   }
 
   return {

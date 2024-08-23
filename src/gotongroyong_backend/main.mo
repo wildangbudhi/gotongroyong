@@ -10,6 +10,7 @@ import Result "mo:base/Result";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Principal "mo:base/Principal";
+import Nat "mo:base/Nat"
 
 actor {
 
@@ -21,6 +22,17 @@ actor {
   type TransferArgs = {
     amount : Nat;
     toAccount : Account;
+  };
+
+  public shared ({ caller }) func checkBalance(accountID : Text) : async Text {
+    let account : Account = {
+      owner = Principal.fromText(accountID);
+      subaccount = null;
+    };
+    let balance = await Ledger.icrc1_balance_of(account);
+    let tokenCode = await Ledger.icrc1_symbol();
+
+    return Nat.toText(balance) # " " # tokenCode;
   };
 
   public shared ({ caller }) func transfer(args : TransferArgs) : async Result.Result<Ledger.BlockIndex, Text> {
@@ -63,38 +75,38 @@ actor {
     };
   };
 
-  public shared (msg) func whoami() : async Principal {
-      msg.caller
+  public shared (msg) func whoami() : async Text {
+    Principal.toText(msg.caller);
   };
 
   type Report = {
-    latitude: Float;
-    longitude: Float;
-    image: Text;
+    latitude : Float;
+    longitude : Float;
+    image : Text;
   };
 
-  func hashIntPair(pair: ( Int, Int )) : Nat32 {
+  func hashIntPair(pair : (Int, Int)) : Nat32 {
     let (f1, f2) = pair;
-    let hash = ( f1 * 1000 ) + f2;
+    let hash = (f1 * 1000) + f2;
     let hashResult = Nat32.fromIntWrap(hash);
     return hashResult;
   };
 
-  func compareIntPair(pair1: ( Int, Int ), pair2: ( Int, Int )) : Bool {
+  func compareIntPair(pair1 : (Int, Int), pair2 : (Int, Int)) : Bool {
     let (f1_1, f1_2) = pair1;
     let (f2_1, f2_2) = pair2;
     return f1_1 == f2_1 and f1_2 == f2_2;
   };
 
-  var reportDatabases: List.List<Report> = List.fromArray([]);
-  var reportMap: HashMap.HashMap<(Int, Int), Int> = HashMap.HashMap<(Int, Int), Int>(0, compareIntPair, hashIntPair);
-  var cleaningConfirmationDatabases: List.List<Report> = List.fromArray([]);
+  var reportDatabases : List.List<Report> = List.fromArray([]);
+  var reportMap : HashMap.HashMap<(Int, Int), Int> = HashMap.HashMap<(Int, Int), Int>(0, compareIntPair, hashIntPair);
+  var cleaningConfirmationDatabases : List.List<Report> = List.fromArray([]);
 
-  public shared (msg) func addReport(lat: Float, long: Float, image: Text) : async Bool {
+  public shared (msg) func addReport(lat : Float, long : Float, image : Text) : async Bool {
 
-    Debug.print( Principal.toText( msg.caller ) );
+    Debug.print(Principal.toText(msg.caller));
 
-    let newReport: Report = {
+    let newReport : Report = {
       latitude = lat;
       longitude = long;
       image = image;
@@ -102,28 +114,28 @@ actor {
 
     reportDatabases := List.push<Report>(newReport, reportDatabases);
 
-    let compareKey: (Int, Int) = ( Float.toInt( lat * 1000 ), Float.toInt( long * 1000 ) );
-    
-    let c: ?Int = reportMap.get(compareKey);
-    var counter: Int = switch c {
+    let compareKey : (Int, Int) = (Float.toInt(lat * 1000), Float.toInt(long * 1000));
+
+    let c : ?Int = reportMap.get(compareKey);
+    var counter : Int = switch c {
       case null 0;
-      case (?Int) Int
+      case (?Int) Int;
     };
 
     counter += 1;
     reportMap.put(compareKey, counter);
 
-    let tfAcc: Account = {
+    let tfAcc : Account = {
       owner = msg.caller;
       subaccount = null;
     };
 
-    let tfArgs: TransferArgs = {
+    let tfArgs : TransferArgs = {
       amount = 1;
       toAccount = tfAcc;
     };
 
-    let _ = transfer( tfArgs );
+    let _ = transfer(tfArgs);
 
     return true
 
@@ -134,46 +146,46 @@ actor {
   };
 
   type MapsReport = {
-    lat: Float;
-    long: Float;
-    labelCount: Int;
+    lat : Float;
+    long : Float;
+    labelCount : Int;
   };
 
   public query func getReportMaps() : async [MapsReport] {
 
-    var mapReports: [MapsReport] = [];
+    var mapReports : [MapsReport] = [];
 
     for ((key, value) in reportMap.entries()) {
       let (latInt, longInt) = key;
-      let lat = Float.fromInt( latInt ) / 1000.0;
-      let long = Float.fromInt( longInt ) / 1000.0;
+      let lat = Float.fromInt(latInt) / 1000.0;
+      let long = Float.fromInt(longInt) / 1000.0;
 
-      let rep: MapsReport = {
+      let rep : MapsReport = {
         lat = lat;
         long = long;
         labelCount = value;
       };
 
-      mapReports := Array.append( mapReports, [rep] );
-      
+      mapReports := Array.append(mapReports, [rep]);
+
     };
 
     return mapReports;
 
   };
 
-  public query func getCounter( lat: Float, long: Float ) : async Int {
-    let compareKey: (Int, Int) = ( Float.toInt( lat * 1000 ), Float.toInt( long * 1000 ) );
-    let counter: ?Int = reportMap.get(compareKey);
+  public query func getCounter(lat : Float, long : Float) : async Int {
+    let compareKey : (Int, Int) = (Float.toInt(lat * 1000), Float.toInt(long * 1000));
+    let counter : ?Int = reportMap.get(compareKey);
     return switch counter {
       case null 0;
-      case (?Int) Int
+      case (?Int) Int;
     };
   };
 
-  public shared (msg) func confirmCleaning(lat: Float, long: Float, image: Text) : async Bool {
+  public shared (msg) func confirmCleaning(lat : Float, long : Float, image : Text) : async Bool {
 
-    let newConfirmation: Report = {
+    let newConfirmation : Report = {
       latitude = lat;
       longitude = long;
       image = image;
@@ -181,28 +193,27 @@ actor {
 
     cleaningConfirmationDatabases := List.push<Report>(newConfirmation, cleaningConfirmationDatabases);
 
-    let compareKey: (Int, Int) = ( Float.toInt( lat * 1000 ), Float.toInt( long * 1000 ) );
+    let compareKey : (Int, Int) = (Float.toInt(lat * 1000), Float.toInt(long * 1000));
     reportMap.delete(compareKey);
 
-    reportDatabases := List.filter<Report>( 
+    reportDatabases := List.filter<Report>(
       reportDatabases,
-      func item { 
-        Float.toInt( item.latitude * 1000 ) != Float.toInt( lat * 1000 ) 
-        and Float.toInt( item.longitude * 1000 ) != Float.toInt( long * 1000 )
-      }
+      func item {
+        Float.toInt(item.latitude * 1000) != Float.toInt(lat * 1000) and Float.toInt(item.longitude * 1000) != Float.toInt(long * 1000)
+      },
     );
 
-    let tfAcc: Account = {
+    let tfAcc : Account = {
       owner = msg.caller;
       subaccount = null;
     };
 
-    let tfArgs: TransferArgs = {
+    let tfArgs : TransferArgs = {
       amount = 10;
       toAccount = tfAcc;
     };
 
-    let _ = transfer( tfArgs );
+    let _ = transfer(tfArgs);
 
     return true
 
